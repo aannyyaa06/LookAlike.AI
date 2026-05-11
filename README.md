@@ -1,7 +1,5 @@
 <div align="center">
 
-<!-- Banner -->
-<img src="static/logo.png" alt="LookALike.AI Logo" width="120" height="120" />
 
 # LookALike.AI
 
