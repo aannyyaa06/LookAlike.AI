@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #20367a;
+            --primary-light: #2d4a9e;
+            --accent: #4f8cff;
+            --bg-dark: #0f1724;
+            --bg-card: #192035;
+            --text-primary: #e8ecf4;
+            --text-secondary: #8e99b0;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --border: rgba(79, 140, 255, 0.15);
+            --glow: rgba(79, 140, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light)) !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 0.8rem 0;
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .navbar-brand img {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* Page Title */
+        .page-title {
+            text-align: center;
+            margin: 2rem 0 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Mode Toggle */
+        .mode-toggle-container {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2rem;
+        }
+        .mode-btn {
+            padding: 0.7rem 2rem;
+            border: 2px solid var(--accent);
+            background: transparent;
+            color: var(--accent);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mode-btn:first-child {
+            border-radius: 10px 0 0 10px;
+        }
+        .mode-btn:last-child {
+            border-radius: 0 10px 10px 0;
+            border-left: none;
+        }
+        .mode-btn.active {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 15px var(--glow);
+        }
+        .mode-btn:hover:not(.active) {
+            background: rgba(79, 140, 255, 0.1);
+        }
+
+        /* Upload Section */
+        .upload-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .input-group input[type="file"] {
+            flex: 1;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            padding: 0.6rem 1rem;
+        }
+        .input-group input[type="file"]::file-selector-button {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 12px;
+            transition: all 0.3s;
+        }
+        .input-group input[type="file"]::file-selector-button:hover {
+            transform: scale(1.02);
+        }
+        .btn-analyze {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            color: #fff;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        .btn-analyze:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--glow);
+        }
+
+        /* Webcam Section */
+        .webcam-section {
+            display: none;
+        }
+        .webcam-section.active {
+            display: block;
+        }
+        .upload-section.active {
+            display: block;
+        }
+        .upload-section {
+            display: none;
+        }
+
+        .webcam-container {
+            position: relative;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .webcam-video-wrapper {
+            position: relative;
+            display: inline-block;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border: 2px solid var(--border);
+            background: #000;
+        }
+        .webcam-video-wrapper video,
+        .webcam-video-wrapper canvas {
+            max-width: 100%;
+            display: block;
+            border-radius: 10px;
+        }
+        #webcamCanvas {
+            display: none;
+        }
+
+        .webcam-overlay {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+            animation: pulse-dot 1.5s infinite;
+        }
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.3); }
+        }
+
+        .webcam-controls {
+            margin-top: 1.2rem;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .btn-webcam {
+            padding: 0.7rem 1.8rem;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #fff;
+        }
+        .btn-capture {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .btn-capture:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+        }
+        .btn-retake {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            display: none;
+        }
+        .btn-retake:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+        }
+        .btn-submit-webcam {
+            background: linear-gradient(135deg, var(--accent), #6366f1);
+            display: none;
+        }
+        .btn-submit-webcam:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--glow);
+        }
+
+        /* Captured preview */
+        #capturedPreview {
+            display: none;
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        /* Results */
+        .results-section {
+            margin-top: 2rem;
+        }
+        .results-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .results-card h5 {
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .processed-img {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+
+        /* Table */
+        .results-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .results-table thead {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+        }
+        .results-table th {
+            padding: 0.8rem 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-primary);
+            border: none;
+        }
+        .results-table td {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: var(--bg-dark);
+        }
+        .results-table tr:last-child td {
+            border-bottom: none;
+        }
+        .results-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .results-table .roi-img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 36, 0.85);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .loading-overlay.show {
+            display: flex;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        /* Webcam Results (AJAX) */
+        #webcamResults {
+            margin-top: 2rem;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 3rem;
+            padding: 1.5rem 0;
+            border-top: 1px solid var(--border);
+            text-align: center;
+        }
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .footer a:hover {
+            color: #a78bfa;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title { font-size: 1.4rem; }
+            .mode-btn { padding: 0.5rem 1.2rem; font-size: 0.85rem; }
+            .webcam-controls { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Analyzing face...</div>
+    </div>
+
+    <!-- Navigation bar -->
+    <nav class="navbar navbar-dark">
+        <div class="container">
+            <a href="/" class="navbar-brand">
+            <img src="{% static 'logo.png' %}" alt="" width="60" height="40">
+            Vision Craft
+            </a>
+        </div>
+    </nav>
+
+    <!-- Body -->
+    <div class="container" style="max-width: 960px;">
+        <h3 class="page-title"><i class="fas fa-face-smile"></i> Facial Analysis</h3>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle-container">
+            <button class="mode-btn active" id="btnUploadMode" onclick="switchMode('upload')">
+                <i class="fas fa-upload"></i> Upload Image
+            </button>
+            <button class="mode-btn" id="btnWebcamMode" onclick="switchMode('webcam')">
+                <i class="fas fa-video"></i> Use Webcam
+            </button>
+        </div>
+
+        <!-- Upload Mode -->
+        <div class="upload-section active" id="uploadSection">
+            <div class="upload-card">
+                <form action="#" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <label for="{{ form.image.id_for_label }}"></label>
+                        {{ form.image }}
+                        <input type="submit" value="Analyze Face" class="btn-analyze">
+                    </div>
+                </form>
+            </div>
+
+            {% if upload %}
+            <div class="results-section">
+                <div class="row g-4">
+                    <div class="col-md-5">
+                        <div class="results-card">
+                            <h5><i class="fas fa-image"></i> Processed Image</h5>
+                            <img class="processed-img" src="/media/ml_output/process.jpg" alt="Processed">
+                        </div>
+                    </div>
+                    <div class="col-md-7">
+                        <div class="results-card">
+                            <h5><i class="fas fa-chart-bar"></i> Analysis Results</h5>
+                            <table class="results-table">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        {% for c in results.count %}
+                                            <th>Face {{ c }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Face ROI</td>
+                                        {% for c in results.count %}
+                                            <td><img class="roi-img" src="/media/ml_output/roi_{{ c }}.jpg" alt="ROI"></td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Detection Score</td>
+                                        {% for detect_score in results.face_detect_score %}
+                                            <td>{{ detect_score }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Name</td>
+                                        {% for name in results.face_name %}
+                                            <td>{{ name }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Name Score</td>
+                                        {% for name_score in results.face_name_score %}
+                                            <td>{{ name_score }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Emotion</td>
+                                        {% for emotion in results.emotion_name %}
+                                            <td>{{ emotion }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    <tr>
+                                        <td>Emotion Score</td>
+                                        {% for emotion_score in results.emotion_name_score %}
+                                            <td>{{ emotion_score }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Webcam Mode -->
+        <div class="webcam-section" id="webcamSection">
+            <div class="webcam-container">
+                <div class="webcam-video-wrapper" id="videoWrapper">
+                    <div class="webcam-overlay">
+                        <div class="live-dot"></div>
+                        LIVE
+                    </div>
+                    <video id="webcamVideo" autoplay playsinline width="640" height="480"></video>
+                    <canvas id="webcamCanvas" width="640" height="480"></canvas>
+                    <img id="capturedPreview" alt="Captured">
+                </div>
+
+                <div class="webcam-controls">
+                    <button class="btn-webcam btn-capture" id="btnCapture" onclick="captureFrame()">
+                        <i class="fas fa-camera"></i> Capture
+                    </button>
+                    <button class="btn-webcam btn-retake" id="btnRetake" onclick="retakePhoto()">
+                        <i class="fas fa-redo"></i> Retake
+                    </button>
+                    <button class="btn-webcam btn-submit-webcam" id="btnSubmitWebcam" onclick="submitWebcamImage()">
+                        <i class="fas fa-brain"></i> Analyze Face
+                    </button>
+                </div>
+            </div>
+
+            <!-- Webcam Results (populated via AJAX) -->
+            <div id="webcamResults"></div>
+        </div>
+
+        <div class="footer">
+            <a href="http://datascienceanywhere.com"><i class="fas fa-globe"></i> Data Science Anywhere</a>
+        </div>
+    </div>
+
+    <script>
+        let webcamStream = null;
+        let capturedImageData = null;
+
+        // Mode switching
+        function switchMode(mode) {
+            const uploadSection = document.getElementById('uploadSection');
+            const webcamSection = document.getElementById('webcamSection');
+            const btnUpload = document.getElementById('btnUploadMode');
+            const btnWebcam = document.getElementById('btnWebcamMode');
+
+            if (mode === 'upload') {
+                uploadSection.classList.add('active');
+                webcamSection.classList.remove('active');
+                btnUpload.classList.add('active');
+                btnWebcam.classList.remove('active');
+                stopWebcam();
+            } else {
+                uploadSection.classList.remove('active');
+                webcamSection.classList.add('active');
+                btnUpload.classList.remove('active');
+                btnWebcam.classList.add('active');
+                startWebcam();
+            }
+        }
+
+        // Start webcam
+        async function startWebcam() {
+            try {
+                const video = document.getElementById('webcamVideo');
+                webcamStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    }
+                });
+                video.srcObject = webcamStream;
+                video.style.display = 'block';
+                document.getElementById('capturedPreview').style.display = 'none';
+                resetWebcamButtons();
+            } catch (err) {
+                alert('Could not access webcam. Please make sure your camera is connected and you have granted permission.\n\nError: ' + err.message);
+            }
+        }
+
+        // Stop webcam
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+                webcamStream = null;
+            }
+        }
+
+        // Capture frame
+        function captureFrame() {
+            const video = document.getElementById('webcamVideo');
+            const canvas = document.getElementById('webcamCanvas');
+            const preview = document.getElementById('capturedPreview');
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+
+            capturedImageData = canvas.toDataURL('image/jpeg', 0.9);
+            preview.src = capturedImageData;
+            preview.style.display = 'block';
+            video.style.display = 'none';
+
+            // Update buttons
+            document.getElementById('btnCapture').style.display = 'none';
+            document.getElementById('btnRetake').style.display = 'flex';
+            document.getElementById('btnSubmitWebcam').style.display = 'flex';
+
+            // Pause the live overlay dot
+            document.querySelector('.webcam-overlay').style.display = 'none';
+        }
+
+        // Retake photo
+        function retakePhoto() {
+            const video = document.getElementById('webcamVideo');
+            const preview = document.getElementById('capturedPreview');
+
+            preview.style.display = 'none';
+            video.style.display = 'block';
+            capturedImageData = null;
+            document.querySelector('.webcam-overlay').style.display = 'flex';
+            resetWebcamButtons();
+        }
+
+        function resetWebcamButtons() {
+            document.getElementById('btnCapture').style.display = 'flex';
+            document.getElementById('btnRetake').style.display = 'none';
+            document.getElementById('btnSubmitWebcam').style.display = 'none';
+        }
+
+        // Submit webcam image via AJAX
+        async function submitWebcamImage() {
+            if (!capturedImageData) return;
+
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.add('show');
+
+            try {
+                const formData = new FormData();
+                formData.append('image_data', capturedImageData);
+
+                const response = await fetch('/webcam/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayWebcamResults(data);
+                } else {
+                    alert('Error: ' + (data.error || 'Analysis failed'));
+                }
+            } catch (err) {
+                alert('Network error: ' + err.message);
+            } finally {
+                loading.classList.remove('show');
+            }
+        }
+
+        // Display webcam results
+        function displayWebcamResults(data) {
+            const container = document.getElementById('webcamResults');
+            const results = data.results;
+            const count = results.count || [];
+
+            if (count.length === 0) {
+                container.innerHTML = `
+                    <div class="results-section">
+                        <div class="results-card" style="text-align:center; padding:2rem;">
+                            <h5 style="justify-content:center;"><i class="fas fa-exclamation-triangle" style="color:var(--warning)"></i> No Faces Detected</h5>
+                            <p style="color:var(--text-secondary)">Try adjusting your position or lighting and capture again.</p>
+                        </div>
+                    </div>`;
+                return;
+            }
+
+            // Build face columns for headers
+            let faceHeaders = '';
+            let roiCells = '';
+            let detectCells = '';
+            let nameCells = '';
+            let nameScoreCells = '';
+            let emotionCells = '';
+            let emotionScoreCells = '';
+
+            count.forEach((c, i) => {
+                faceHeaders += `<th>Face ${c}</th>`;
+                const ts = Date.now(); // cache buster
+                roiCells += `<td><img class="roi-img" src="${data.roi_images[i]}?t=${ts}" alt="ROI"></td>`;
+                detectCells += `<td>${parseFloat(results.face_detect_score[i]).toFixed(4)}</td>`;
+                nameCells += `<td>${results.face_name[i]}</td>`;
+                nameScoreCells += `<td>${parseFloat(results.face_name_score[i]).toFixed(4)}</td>`;
+                emotionCells += `<td>${results.emotion_name[i]}</td>`;
+                emotionScoreCells += `<td>${parseFloat(results.emotion_name_score[i]).toFixed(4)}</td>`;
+            });
+
+            const ts = Date.now();
+            container.innerHTML = `
+                <div class="results-section">
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <div class="results-card">
+                                <h5><i class="fas fa-image"></i> Processed Image</h5>
+                                <img class="processed-img" src="${data.processed_image}?t=${ts}" alt="Processed">
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="results-card">
+                                <h5><i class="fas fa-chart-bar"></i> Analysis Results</h5>
+                                <table class="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Property</th>
+                                            ${faceHeaders}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td>Face ROI</td>${roiCells}</tr>
+                                        <tr><td>Detection Score</td>${detectCells}</tr>
+                                        <tr><td>Name</td>${nameCells}</tr>
+                                        <tr><td>Name Score</td>${nameScoreCells}</tr>
+                                        <tr><td>Emotion</td>${emotionCells}</tr>
+                                        <tr><td>Emotion Score</td>${emotionScoreCells}</tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        }
+    </script>
+
+</body>
+</html>
